@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title>Staff Dashboard - ResolveIT</title>
+</head>
+<body>
+    <div th:fragment="content" class="space-y-8">
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Staff Workspace</h1>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Review and manage assigned grievances</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-xs font-bold uppercase tracking-wider border border-blue-100 dark:border-blue-800">
+                    Active Staff
+                </span>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border dark:border-gray-700 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Assigned</p>
+                <p class="text-3xl font-extrabold text-gray-900 dark:text-white" th:text="${#lists.size(complaints)}">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border dark:border-gray-700 shadow-sm">
+                <p class="text-[10px] font-bold text-yellow-500 uppercase tracking-widest mb-1">In Progress</p>
+                <p class="text-3xl font-extrabold text-gray-900 dark:text-white" th:text="${#lists.size(complaints.?[status == 'Open' || status == 'Pending' || status == 'Under Review'])}">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border dark:border-gray-700 shadow-sm">
+                <p class="text-[10px] font-bold text-green-500 uppercase tracking-widest mb-1">Resolved</p>
+                <p class="text-3xl font-extrabold text-gray-900 dark:text-white" th:text="${#lists.size(complaints.?[status == 'Solved' || status == 'Resolved'])}">0</p>
+            </div>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-xl border dark:border-gray-700 shadow-sm">
+                <p class="text-[10px] font-bold text-red-500 uppercase tracking-widest mb-1">Denied</p>
+                <p class="text-3xl font-extrabold text-gray-900 dark:text-white" th:text="${#lists.size(complaints.?[status == 'Denied'])}">0</p>
+            </div>
+        </div>
+
+        <!-- Complaints Table Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 shadow-sm overflow-hidden">
+            <div class="px-6 py-5 border-b dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <h2 class="font-bold text-gray-800 dark:text-gray-200">Active Grievances</h2>
+                <div class="flex items-center gap-2 overflow-x-auto">
+                    <button onclick="filterTable('')" class="filter-btn active text-[10px] font-bold uppercase px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">All</button>
+                    <button onclick="filterTable('Open')" class="filter-btn text-[10px] font-bold uppercase px-3 py-1.5 rounded-lg border border-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 transition-all">Open</button>
+                    <button onclick="filterTable('Pending')" class="filter-btn text-[10px] font-bold uppercase px-3 py-1.5 rounded-lg border border-transparent hover:bg-yellow-50 dark:hover:bg-yellow-900/20 text-yellow-600 transition-all">Pending</button>
+                    <button onclick="filterTable('Solved')" class="filter-btn text-[10px] font-bold uppercase px-3 py-1.5 rounded-lg border border-transparent hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 transition-all">Solved</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse" id="complaintTable">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-900/50 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b dark:border-gray-700">
+                            <th class="px-6 py-4">ID</th>
+                            <th class="px-6 py-4">User & Title</th>
+                            <th class="px-6 py-4">Details</th>
+                            <th class="px-6 py-4">Urgency</th>
+                            <th class="px-6 py-4 text-center">Attachment</th>
+                            <th class="px-6 py-4 text-center">Status</th>
+                            <th class="px-6 py-4 text-right">Update Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y dark:divide-gray-700">
+                        <tr th:each="c : ${complaints}" th:attr="data-status=${c.status}"
+                            class="group hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap text-xs font-mono text-gray-400" th:text="'#' + ${c.id}">#</td>
+                            <td class="px-6 py-4">
+                                <div class="font-bold text-gray-900 dark:text-white" th:text="${c.userName}">User</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5" th:text="${c.title}">Title</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-[10px] font-bold uppercase py-0.5 px-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300" th:text="${c.category}">Cat</span>
+                                <div class="text-[10px] text-gray-400 mt-1" th:text="${#temporals.format(c.createdAt, 'dd MMM (HH:mm)')} ?: 'N/A'">Date</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="text-[10px] font-extrabold uppercase px-2 py-1 rounded-lg border"
+                                    th:classappend="${c.urgency == 'High' || c.urgency == 'Urgent'} ? 'bg-red-50 text-red-600 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/40' : 
+                                                   (${c.urgency == 'Medium'} ? 'bg-yellow-50 text-yellow-600 border-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-900/40' : 
+                                                   'bg-green-50 text-green-600 border-green-100 dark:bg-green-900/20 dark:text-green-400 dark:border-green-900/40')"
+                                    th:text="${c.urgency}">High</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <a th:if="${c.attachmentPath != null}" 
+                                   th:href="@{'/uploads/' + ${c.attachmentPath.replaceAll('uploads[\\/]', '')}}" 
+                                   target="_blank" class="inline-flex items-center justify-center p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-blue-600 hover:text-white transition-all">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                                </a>
+                                <span th:if="${c.attachmentPath == null}" class="text-gray-300 dark:text-gray-700">—</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider"
+                                    th:classappend="${c.status == 'Open' || c.status == 'New'} ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                                                   (${c.status == 'Pending' || c.status == 'Under Review'} ? 'bg-yellow-100 text-yellow-700' :
+                                                   (${c.status == 'Solved' || c.status == 'Resolved'} ? 'bg-green-100 text-green-700' : 
+                                                   'bg-red-100 text-red-700'))"
+                                    th:text="${c.status}">
+                                    STATUS
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <form class="update-form flex items-center justify-end gap-1" th:action="@{/staff/updateStatus}" method="post">
+                                    <input type="hidden" name="id" th:value="${c.id}">
+                                    <input type="hidden" name="staffId" th:value="${staffId}">
+                                    <select name="status" class="text-[10px] font-bold uppercase bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-2 py-1.5 outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option th:selected="${c.status == 'Open'}">Open</option>
+                                        <option th:selected="${c.status == 'Pending'}">Pending</option>
+                                        <option th:selected="${c.status == 'Solved'}">Solved</option>
+                                        <option th:selected="${c.status == 'Denied'}">Denied</option>
+                                    </select>
+                                    <button type="submit" class="p-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm flex items-center justify-center transition-all active:scale-95">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(complaints)}">
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                <p class="text-sm font-medium">No complaints assigned to you yet.</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            function filterTable(status) {
+                const rows = document.querySelectorAll('#complaintTable tbody tr[data-status]');
+                rows.forEach(row => {
+                    if (!status || row.dataset.status === status) {
+                        row.classList.remove('hidden');
+                    } else {
+                        row.classList.add('hidden');
+                    }
+                });
+                
+                // Active button styling
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'active');
+                    if(btn.textContent.trim().toLowerCase() === (status || 'all').toLowerCase()) {
+                        btn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'active');
+                    }
+                });
+            }
+
+            // AJAX form submission with JWT header
+            document.querySelectorAll('.update-form').forEach(form => {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(form);
+                    const action = form.getAttribute('action');
+                    const token = localStorage.getItem('jwtToken');
+
+                    try {
+                        const response = await fetch(action, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: new URLSearchParams(formData)
+                        });
+
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            const err = await response.text();
+                            alert('Update failed: ' + err);
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>

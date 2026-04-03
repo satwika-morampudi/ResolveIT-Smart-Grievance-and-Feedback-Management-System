@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: layout(~{::content})}">
+<head>
+    <title th:text="'Complaint #' + ${complaint.id} + ' - ResolveIT'">Complaint Details</title>
+</head>
+<body>
+    <div th:fragment="content" class="max-w-4xl mx-auto space-y-8">
+        <!-- Back Navigation -->
+        <div class="flex items-center justify-between">
+            <a th:href="${backUrl}" class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Back to Dashboard
+            </a>
+            <div class="px-3 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-[10px] font-mono font-bold text-gray-500 dark:text-gray-400 border dark:border-gray-700" th:text="'#' + ${complaint.id}">#ID</div>
+        </div>
+
+        <!-- Main Header Card -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 shadow-sm overflow-hidden p-8 space-y-8">
+            <div class="space-y-6">
+                <h1 class="text-3xl font-black tracking-tight text-gray-900 dark:text-white" th:text="${complaint.title}">Complaint Title</h1>
+                <div class="flex flex-wrap gap-3">
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest"
+                        th:classappend="${complaint.status == 'New' || complaint.status == 'Open'} ? 'bg-blue-100 text-blue-700' :
+                                       (${complaint.status == 'Under Review' || complaint.status == 'Pending'} ? 'bg-yellow-100 text-yellow-700' :
+                                       (${complaint.status == 'Resolved' || complaint.status == 'Solved'} ? 'bg-green-100 text-green-700' : 
+                                       'bg-red-100 text-red-700'))"
+                        th:text="${complaint.status}">
+                    </span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 rounded-lg text-[10px] font-bold uppercase tracking-wider border dark:border-gray-700">
+                        📁 <span th:text="${complaint.category}">Category</span>
+                    </span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 rounded-lg text-[10px] font-bold uppercase tracking-wider border dark:border-gray-700">
+                        ⚡ <span th:text="${complaint.urgency}">High</span>
+                    </span>
+                    <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700/50 text-gray-400 dark:text-gray-500 rounded-lg text-[10px] font-bold uppercase tracking-wider border dark:border-gray-700" th:if="${complaint.createdAt != null}">
+                        📅 <span th:text="${#temporals.format(complaint.createdAt, 'dd MMM yyyy')}">Date</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Description Block -->
+            <div class="bg-gray-50 dark:bg-gray-900/40 p-6 rounded-xl border dark:border-gray-700">
+                <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-4">Detailed Description</h3>
+                <p class="text-sm leading-relaxed text-gray-700 dark:text-gray-300" th:text="${complaint.description}">Description text...</p>
+            </div>
+        </div>
+
+        <!-- Progress Tracker -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 shadow-sm p-8">
+            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-10 text-center">Resolution Progress</h3>
+            <div class="relative flex items-center justify-between">
+                <!-- Progress Line Background -->
+                <div class="absolute left-0 top-5 w-full h-1 bg-gray-100 dark:bg-gray-700 -z-0 rounded-full"></div>
+                <!-- Progress Line Fill -->
+                <div class="absolute left-0 top-5 h-1 bg-blue-600 -z-0 transition-all duration-1000 rounded-full"
+                     th:style="'width:' + (${complaint.status == 'New' || complaint.status == 'Open' ? '33%' : (complaint.status == 'Under Review' || complaint.status == 'Pending' ? '66%' : '100%')})"></div>
+
+                <!-- Steps -->
+                <div class="relative flex flex-col items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl border-4 border-white dark:border-gray-800 flex items-center justify-center font-bold text-xs shadow-sm transition-all z-10"
+                        th:classappend="${complaint.status == 'New' || complaint.status == 'Open' || complaint.status == 'Under Review' || complaint.status == 'Pending' || complaint.status == 'Resolved' || complaint.status == 'Solved'} ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'">1</div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Submitted</span>
+                </div>
+                <div class="relative flex flex-col items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl border-4 border-white dark:border-gray-800 flex items-center justify-center font-bold text-xs shadow-sm transition-all z-10"
+                        th:classappend="${complaint.status == 'Under Review' || complaint.status == 'Pending' || complaint.status == 'Resolved' || complaint.status == 'Solved'} ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' : 'bg-gray-200 dark:bg-gray-700 text-gray-400'">2</div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500">Assessed</span>
+                </div>
+                <div class="relative flex flex-col items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-xl border-4 border-white dark:border-gray-800 flex items-center justify-center font-bold text-xs shadow-sm transition-all z-10"
+                        th:classappend="${complaint.status == 'Resolved' || complaint.status == 'Solved'} ? 'bg-green-600 text-white shadow-lg shadow-green-500/30' : 
+                                       (${complaint.status == 'Denied'} ? 'bg-red-600 text-white shadow-lg shadow-red-500/30' : 'bg-gray-200 dark:bg-gray-700 text-gray-400')">3</div>
+                    <span class="text-[10px] font-black uppercase tracking-widest text-gray-500" th:text="${complaint.status == 'Denied' ? 'Denied' : 'Resolved'}">Resolved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 shadow-sm p-8">
+            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-8">Activity Flow</h3>
+            <div class="space-y-8" th:if="${!#lists.isEmpty(history)}">
+                <div th:each="entry : ${history}" class="relative pl-8 pb-8 border-l-2 border-dashed border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
+                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 shadow-sm"
+                        th:classappend="${entry.status == 'New' || entry.status == 'Open' ? 'bg-blue-500' : (entry.status == 'Resolved' || entry.status == 'Solved' ? 'bg-green-500' : (entry.status == 'Denied' ? 'bg-red-500' : 'bg-yellow-500'))}"></div>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider" th:text="${entry.status}">Status Change</span>
+                            <span class="text-[10px] font-mono font-bold text-gray-400" th:text="${#temporals.format(entry.updatedAt, 'dd MMM, HH:mm')} ?: 'Date unknown'">Time</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-900/40 p-4 rounded-xl border dark:border-gray-700 text-sm text-gray-600 dark:text-gray-400 italic" th:if="${entry.note != null}" th:text="${entry.note}">Note content...</div>
+                        <div class="text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase flex items-center gap-1.5 pt-1" th:if="${entry.updatedBy != null}">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            Updated by <span th:text="${entry.updatedBy}">Name</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center py-12 text-gray-400 italic text-sm border-2 border-dashed dark:border-gray-700 rounded-2xl" th:if="${#lists.isEmpty(history)}">
+                No activity has been logged yet for this report.
+            </div>
+        </div>
+
+        <!-- Attachment Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-2xl border dark:border-gray-700 shadow-sm p-8 flex items-center justify-between gap-6" th:if="${complaint.attachmentPath != null and !complaint.attachmentPath.isEmpty()}">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center text-gray-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-0.5">Verified Document</h3>
+                    <p class="text-xs text-gray-900 dark:text-white font-bold">attachment_file.pdf</p>
+                </div>
+            </div>
+            <a th:href="@{'/uploads/' + ${complaint.attachmentPath.replaceAll('uploads[\\/]', '')}}" target="_blank" 
+               class="px-5 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 font-bold text-[10px] uppercase tracking-widest rounded-lg transition-all hover:bg-black dark:hover:bg-white active:scale-95 flex items-center gap-2">
+               Download <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M7 10l5 5m0 0l5-5m-5 5V3"/></svg>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
